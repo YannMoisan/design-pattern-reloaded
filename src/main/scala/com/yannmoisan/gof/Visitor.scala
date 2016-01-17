@@ -12,11 +12,15 @@ object Visitor extends App {
   case class Moto() extends Vehicle
 
   class Visitor[O] {
-    val pfs = new mutable.ArrayBuffer[PartialFunction[Vehicle, O]]
+    val default = PartialFunction.empty[Vehicle, O]
+
+    val pfs = new mutable.ArrayBuffer[PartialFunction[Vehicle, O]]() += default
 
     def when(pf: PartialFunction[Vehicle, O]) = pfs += pf
 
-    def call(v: Vehicle) = pfs.reduce((a, b) => a.orElse(b)).apply(v)
+    lazy val aggregatedPF = pfs.reduce((a, b) => a.orElse(b))
+
+    def call(v: Vehicle) = aggregatedPF.apply(v)
   }
 
   val visitor = new Visitor[String]()
